@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  webapi:
+    image: ${DOCKER_REGISTRY-}webclient
+    build:
+      context: .
+      dockerfile: Clients/NotesApp.WebClient/Dockerfile
+
+  webapi:
+    image: ${DOCKER_REGISTRY-}webapi
+    build:
+      context: .
+      dockerfile: Backend/NotesApp.WebApi/Dockerfile

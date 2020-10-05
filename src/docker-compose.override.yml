@@ -1,0 +1,57 @@
+version: '3.4'
+
+services:
+  webclient:
+    container_name: webclient
+    build:
+      context: .
+      dockerfile: Clients/NotesApp.WebClient/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - API_URL=webapi:8888
+    ports:
+      - "8080:80"
+      - "8081:443"
+    networks:
+      - internal-network
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    depends_on:
+      - webapi
+
+  webapi:
+    container_name: webapi
+    build:
+      context: .
+      dockerfile: Backend/NotesApp.WebApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DefaultConnection=Server=sqlserver;User=sa;Password=Pass@word;Database=notesdb
+      - ASPNETCORE_URLS=http://+:8888
+    ports:
+      - "8000:8888"
+    networks:
+      - internal-network
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    container_name: sqlserver
+    image: mcr.microsoft.com/mssql/server:2019-CU3-ubuntu-18.04
+    user: '0:0'
+    ports:
+      - "1433:1433"
+    networks:
+      - internal-network
+    environment:
+      SA_PASSWORD: "Pass@word"
+      ACCEPT_EULA: "Y"
+
+networks:
+  internal-network:
+    external: true
