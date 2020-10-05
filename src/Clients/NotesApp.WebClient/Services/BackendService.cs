@@ -20,31 +20,23 @@ namespace NotesApp.WebClient.Services
 
         public async Task<T> Get<T>(string requestUri, string token = "", Dictionary<string, string> parameters = null)
         {
-            try
+            if (parameters != null)
             {
-                if (parameters != null)
-                {
-                    requestUri = $"{requestUri}?{string.Join("&", parameters.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
-                }
-                HttpResponseMessage response = await GetHttpResponse(requestUri, token);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string content = await response.Content.ReadAsStringAsync();
-                    T cloudResponse = JsonConvert.DeserializeObject<T>(content);
-                    return cloudResponse;
-                }
-                else
-                {
-                    return default(T);
-                }
+                requestUri = $"{requestUri}?{string.Join("&", parameters.Select(kvp => $"{kvp.Key}={kvp.Value}"))}";
             }
-            catch (Exception ex)
+            HttpResponseMessage response = await GetHttpResponse(requestUri, token);
+
+            if (response.IsSuccessStatusCode)
             {
-
-                throw ex;
+                string content = await response.Content.ReadAsStringAsync();
+                T cloudResponse = JsonConvert.DeserializeObject<T>(content);
+                return cloudResponse;
             }
-            
+            else
+            {
+                return default(T);
+            }
+
         }
 
         public async Task<HttpResponseMessage> GetHttpResponse(string requestUri, string token = "")
